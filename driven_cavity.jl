@@ -65,7 +65,7 @@ for i = 1:xGrid+1
 end
 
 
-for is = 1:MaxStep
+anim = @animate for is = 1:MaxStep
     # assign boundary conditions
     u[1:xGrid+1, 1] .= (2 * us .- u[1:xGrid+1, 2])
     u[1:xGrid+1, yGrid+2] .= (2 * un .- u[1:xGrid+1, yGrid+1])
@@ -117,8 +117,11 @@ for is = 1:MaxStep
 #= 
     #Plot it
     global plt = quiver!(x, y, quiver=(uu, vv))
-    display(plt)
+    #display(plt)
 =#
 
 end
 
+gif(anim, "driven_cavity_anim_solution.gif", fps=15)
+
+savefig("driven cavity with UN at a tenth.png")
