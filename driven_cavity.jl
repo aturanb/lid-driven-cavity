@@ -114,11 +114,10 @@ anim = @animate for is = 1:MaxStep
     global time += Δt # plot +e results
     uu[1:xGrid+1, 1:yGrid+1] = 0.5 * (u[1:xGrid+1, 2:yGrid+2] + u[1:xGrid+1, 1:yGrid+1])
     vv[1:xGrid+1, 1:yGrid+1] = 0.5 * (v[2:xGrid+2, 1:yGrid+1] + v[1:xGrid+1, 1:yGrid+1])
-#= 
+ 
     #Plot it
     global plt = quiver!(x, y, quiver=(uu, vv))
     #display(plt)
-=#
 
 end
 
