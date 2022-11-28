@@ -58,7 +58,7 @@ y = zeros(Float64, xGrid + 1, yGrid + 1)
 
 # Fill in the grid points 
 for i = 1:xGrid+1
-    for j = 1:yGrid+1,
+    for j = 1:yGrid+1
         x[i, j] = Δx  * (i - 1)
         y[i, j] = Δy  * (j - 1)
     end
@@ -86,7 +86,7 @@ anim = @animate for is = 1:MaxStep
     end
 
     for it = 1:MaxIt # solve for pressure
-        global pold = p
+        global pold = copy(p)
 
         for i = 2:xGrid+1
             for j = 2:yGrid+1
@@ -96,7 +96,7 @@ anim = @animate for is = 1:MaxStep
 
         Err = 0.0 # check error
         for i = 2:xGrid+1
-            for j = 2:yGrid+1,
+            for j = 2:yGrid+1
                 Err = Err + abs(pold[i, j] - p[i, j])
 
             end
