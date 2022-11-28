@@ -68,7 +68,7 @@ function poisson_solve_2D(source_func, Nx, Ny, xf, yf;
     Ix = sparse_identity(Nx-1)
     Iy = sparse_identity(Ny-1)
 
-    A = kron(Dxx, Iy) + kron(Ix, Dyy)
+    A = kron(Iy, Dxx) + kron(Dyy, Ix)
 
     # SCALAR FIELD TO SOLVE FOR
     p = zeros(Nx+1, Ny+1) 
@@ -161,8 +161,9 @@ end
 
 # ------------------------------------------Set spatial grid----------------------------------------------
 Nx = 32
-Ny = 32
-xf = yf = 1.
+Ny = 64
+xf = 1.
+yf = 2.
 # --------------------------------------------------------------------------------------------------------
 
 
