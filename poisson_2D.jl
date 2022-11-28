@@ -27,6 +27,7 @@ function sparse_identity(N)
     return sparse(I, J, V)
 end
 
+#=
 # issues when Nx != Ny
 Nx = 16
 Ny = 16
@@ -97,42 +98,10 @@ p_int = reshape(p_int_vec, Ny-1, Nx-1)'  # note the ' character to take adjoint
 # fill in main matrix for p
 p[2:end-1, 2:end-1] .= p_int
 
+p = p'
 
-function p_true(x, y)
-    # inputs are 1-D vectors. function will create meshgrid for them.
-    x_mesh = x * ones(length(y))'
-    y_mesh = ones(length(x)) * y'
-    p = sin.(π*x_mesh) .* sin.(2*π*y_mesh)
+=#
 
-    # enforce boundary conditions
-    p[1, :]   .= 0  # x=0
-    p[:, 1]   .= 0  # y=0
-    p[end, :] .= 0  # x=xf
-    p[:, end] .= 0  # y=yf
-
-    return p
-end
-
-exact_soln = p_true(x, y)'
-
-
-fig = PlotlyJS.make_subplots(
-        rows=1, cols=2,
-        specs=fill(PlotlyJS.Spec(kind="scene"), 1, 2),
-        column_titles=["exact solution", "numerical solution"]
-)
-PlotlyJS.add_trace!(fig, PlotlyJS.surface(x=x, y=y, z=exact_soln, 
-    showscale=false), row=1, col=1)
-PlotlyJS.add_trace!(fig, PlotlyJS.surface(x=x, y=y, z=p, 
-    showscale=false), row=1, col=2)
-fig
-
-# p1 = Plots.surface(x, y, exact_soln, title="Exact Solution", cbar=false)
-# p2 = Plots.surface(x, y, p, title="Numerical Solution", cbar=false)
-# # Plots.plot(p1)
-# Plots.plot(p1, p2, layout=(1, 2))
-# Plots.xlabel!("x")
-# Plots.ylabel!("y")
 
 # write a function that generalizes this solver for arbitrary number of nodes, source function (f), and BCs
 """
@@ -209,6 +178,67 @@ function poisson_solve_2D(source_func, Nx, Ny, xf, yf;
     # fill in main matrix for p
     p[2:end-1, 2:end-1] .= p_int
 
+    # reinforce boundary conditions
+    # p[1, :]   .= left_bound    # x=0
+    # p[:, 1]   .= bottom_bound  # y=0
+    # p[end, :] .= right_bound   # x=xf
+    # p[:, end] .= top_bound     # y=yf
+
+    p = p'
+
     return (x, y, p)
 
 end
+
+
+function p_true(x, y)
+    # inputs are 1-D vectors. function will create meshgrid for them.
+    x_mesh = x * ones(length(y))'
+    y_mesh = ones(length(x)) * y'
+    p = sin.(π*x_mesh) .* cos.(2*π*y_mesh)
+
+    # enforce boundary conditions
+    # p[1, :]   .= 0  # x=0
+    # p[:, 1]   .= 0  # y=0
+    # p[end, :] .= 0  # x=xf
+    # p[:, end] .= 0  # y=yf
+
+    return p
+end
+
+function source(x, y)
+    # RHS of Poisson equation ∇^2 P = f(x, y)
+    # in this case, determined by manufacturing a solution for P 
+    return -5 * π^2 * sin.(π*x) .* cos.(2*π*y)
+end
+
+Nx = Ny = 32
+xf = yf = 1.
+dx = xf/Nx
+x_vals = collect(0:dx:xf)
+top = bottom = sin.(π*x_vals)
+# top = bottom = zeros(Nx+1)
+
+x, y, p = poisson_solve_2D(source, Nx, Ny, xf, yf; left_bound=zeros(Ny+1), right_bound=zeros(Ny+1), 
+    top_bound=top, bottom_bound=bottom)
+
+exact_soln = p_true(x, y)
+
+
+fig = PlotlyJS.make_subplots(
+        rows=1, cols=2,
+        specs=fill(PlotlyJS.Spec(kind="scene"), 1, 2),
+        column_titles=["exact solution", "numerical solution"]
+)
+PlotlyJS.add_trace!(fig, PlotlyJS.surface(x=x, y=y, z=exact_soln, 
+    showscale=false), row=1, col=1)
+PlotlyJS.add_trace!(fig, PlotlyJS.surface(x=x, y=y, z=p, 
+    showscale=false), row=1, col=2)
+fig
+
+# p1 = Plots.surface(x, y, exact_soln, title="Exact Solution", cbar=false)
+# p2 = Plots.surface(x, y, p, title="Numerical Solution", cbar=false)
+# # Plots.plot(p1)
+# Plots.plot(p1, p2, layout=(1, 2))
+# Plots.xlabel!("x")
+# Plots.ylabel!("y")
